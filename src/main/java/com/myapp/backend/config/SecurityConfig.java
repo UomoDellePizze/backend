@@ -31,10 +31,8 @@ public class SecurityConfig {
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Endpoint pubblici
-                .requestMatchers("/actuator/**").permitAll()
-                // Tutto il resto richiede autenticazione
-                .anyRequest().authenticated()
+                .requestMatchers("/api/me").authenticated()
+                .anyRequest().permitAll()
             )
             .oauth2ResourceServer(oauth2 ->
                 oauth2.jwt(jwt ->

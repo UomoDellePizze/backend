@@ -1,21 +1,17 @@
-package com.myapp.backend.register;
+package com.myapp.backend.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.myapp.backend.user.User;
-import com.myapp.backend.user.UserRepository;
-import com.myapp.backend.keycloak.KeycloakService;
+import com.myapp.backend.service.UserService;
+import com.myapp.backend.dto.RegisterRequest;
 
 @RestController
 @RequestMapping("/api/auth")
 public class RegisterController {
 
     @Autowired
-    private KeycloakService keycloakService;
-
-    @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest req) {
@@ -25,16 +21,7 @@ public class RegisterController {
                 return ResponseEntity.badRequest().body("Email, username, and password are required");
             }
 
-            // Create user in Keycloak
-            String keycloakId = keycloakService.createUser(req);
-
-            // Create user in database
-            User user = new User();
-            user.setKeycloakId(keycloakId);
-            user.setEmail(req.getEmail());
-            user.setUsername(req.getUsername());
-
-            userRepository.save(user);
+            userService.registerUser(req);
 
             return ResponseEntity.ok().body("User registered successfully");
         } catch (Exception e) {

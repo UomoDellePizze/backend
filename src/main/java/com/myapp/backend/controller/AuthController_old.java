@@ -1,3 +1,4 @@
+/*
 package com.myapp.backend.controller;
 
 import com.myapp.backend.dto.RegisterRequest;
@@ -19,3 +20,4 @@ public class AuthController {
         userService.registerUser(request);
     }
 }
+*/

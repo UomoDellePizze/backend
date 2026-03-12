@@ -12,7 +12,7 @@ public class User {
 
     @Column(unique = true)
     private String keycloakId;
-
+  
     private String username;
 
     private String email;

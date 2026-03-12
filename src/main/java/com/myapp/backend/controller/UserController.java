@@ -42,7 +42,7 @@ public class UserController {
      * GET /api/welcome — endpoint di esempio protetto per la welcome page
      */
     @GetMapping("/welcome")
-    //@PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Map<String, String>> welcome(@AuthenticationPrincipal Jwt jwt) {
         String username = getClaimOrDefault(jwt, "preferred_username", "Utente");
         return ResponseEntity.ok(Map.of(
@@ -60,7 +60,7 @@ public class UserController {
      * GET /api/users
      */
     @GetMapping("/users")
-    @PreAuthorize("hasRole('USER')")
+    //@PreAuthorize("hasRole('USER')")
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }

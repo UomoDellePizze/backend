@@ -19,15 +19,16 @@ public class UserService {
 
     public void registerUser(RegisterRequest req) {
 
-        // 1️⃣ crea utente su keycloak
+        // crea utente su keycloak
         String keycloakId = keycloakService.createUser(req);
 
-        // 2️⃣ salva nel database locale
+        // salva nel database locale
         User user = new User();
         user.setKeycloakId(keycloakId);
         user.setUsername(req.getUsername());
         user.setEmail(req.getEmail());
-
+        user.setFirstName(req.getFirstName());
+        user.setLastName(req.getLastName());
         userRepository.save(user);
     }
 }

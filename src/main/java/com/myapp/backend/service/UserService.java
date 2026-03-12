@@ -30,5 +30,7 @@ public class UserService {
         user.setFirstName(req.getFirstName());
         user.setLastName(req.getLastName());
         userRepository.save(user);
+        System.out.println("Utente registrato con successo: " + userRepository.findByKeycloakId(keycloakId).orElseThrow());
+        kafkaProducer.sendUserCreatedEvent(user.getUsername());
     }
 }

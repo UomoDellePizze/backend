@@ -3,6 +3,7 @@ package com.myapp.backend.service;
 import com.myapp.backend.dto.RegisterRequest;
 import com.myapp.backend.entity.User;
 import com.myapp.backend.repository.UserRepository;
+import com.myapp.backend.kafka.KafkaProducerService;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -10,11 +11,12 @@ public class UserService {
 
     private final KeycloakService keycloakService;
     private final UserRepository userRepository;
-
+    private final KafkaProducerService kafkaProducer;
     public UserService(KeycloakService keycloakService,
-                       UserRepository userRepository) {
+                       UserRepository userRepository,KafkaProducerService kafkaProducer) {
         this.keycloakService = keycloakService;
         this.userRepository = userRepository;
+        this.kafkaProducer = kafkaProducer;
     }
 
     public void registerUser(RegisterRequest req) {

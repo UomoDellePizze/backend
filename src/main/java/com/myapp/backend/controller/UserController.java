@@ -45,10 +45,12 @@ public class UserController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Map<String, String>> welcome(@AuthenticationPrincipal Jwt jwt) {
         String username = getClaimOrDefault(jwt, "preferred_username", "Utente");
+        System.out.println("GET /welcome called by " + username);
         return ResponseEntity.ok(Map.of(
             "message", "Benvenuto, " + username + "!",
             "status",  "authenticated"
         ));
+        
     }
 
     private String getClaimOrDefault(Jwt jwt, String claim, String defaultValue) {
@@ -62,6 +64,7 @@ public class UserController {
     @GetMapping("/users")
     //@PreAuthorize("hasRole('USER')")
     public List<User> getAllUsers() {
+        System.out.println("GET /api/users called");
         return userRepository.findAll();
     }
 
@@ -71,7 +74,7 @@ public class UserController {
     @GetMapping("/users/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        return userRepository.findById(id)
+        return userRepository.findByKeycloakId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -118,5 +121,5 @@ public class UserController {
         userRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
-
+    
 }

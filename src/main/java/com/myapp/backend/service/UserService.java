@@ -19,6 +19,10 @@ public class UserService {
         this.kafkaProducer = kafkaProducer;
     }
 
+    public boolean userExists(String username) {
+        return userRepository.findByUsername(username).isPresent();
+    }
+
     public void registerUser(RegisterRequest req) {
 
         // crea utente su keycloak

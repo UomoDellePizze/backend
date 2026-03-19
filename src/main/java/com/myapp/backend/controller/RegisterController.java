@@ -19,7 +19,7 @@ public class RegisterController {
     }
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest req) {
-        if (!userService.userExists(req.getUsername())) {
+        if (!userService.userExists(req.getId())) {
             return ResponseEntity.status(401).body("Invalid username");
         }
         // Questo endpoint è solo un placeholder. La login reale avviene tramite Keycloak.

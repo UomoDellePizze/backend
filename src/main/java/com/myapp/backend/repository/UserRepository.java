@@ -9,7 +9,7 @@ import java.util.Optional;
  * Estende JpaRepository quindi include tutti i metodi CRUD standard:
  *  - save, findById, findAll, delete, deleteById, existsById, count
  */
-public interface UserRepository extends JpaRepository<User, Long> {
-    Optional<User> findByKeycloakId(String keycloakId);
+public interface UserRepository extends JpaRepository<User, String> {
+    Optional<User> findById(String keycloakId);
     Optional<User> findByUsername(String username);
 }

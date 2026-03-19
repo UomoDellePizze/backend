@@ -1,7 +1,7 @@
 package com.myapp.backend.controller;
 
-import com.myapp.backend.entity.User;               
-import com.myapp.backend.repository.UserRepository; 
+import com.myapp.backend.entity.User;
+import com.myapp.backend.service.UserService;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -11,46 +11,54 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+
 @RestController
 @RequestMapping("/api")
 public class UserController {
-    private final UserRepository userRepository;
 
-    public UserController(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
-    /**
-     * GET /api/me — restituisce info dell'utente loggato dal JWT
-     * Angular lo chiama dopo il login per mostrare nome e email sulla Welcome Page
-     */
+
+    // =========================
+    // UTENTE LOGGATO
+    // =========================
     @GetMapping("/me")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Map<String, Object>> getCurrentUser(@AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(Map.of(
-            "sub",              jwt.getSubject(),
-            "username",         getClaimOrDefault(jwt, "preferred_username", ""),
-            "email",            getClaimOrDefault(jwt, "email", ""),
-            "firstName",        getClaimOrDefault(jwt, "given_name", ""),
-            "lastName",         getClaimOrDefault(jwt, "family_name", ""),
-            "emailVerified",    jwt.getClaimAsBoolean("email_verified") != null
-                                    ? jwt.getClaimAsBoolean("email_verified")
-                                    : false
-        ));
+
+        boolean userExists = userService.userExists(jwt.getSubject());
+        if (!userExists) return ResponseEntity.notFound().build();
+
+        return ResponseEntity.ok(
+            Map.of(
+                "sub", jwt.getSubject(),
+                "username", getClaimOrDefault(jwt, "preferred_username", ""),
+                "email", getClaimOrDefault(jwt, "email", ""),
+                "firstName", getClaimOrDefault(jwt, "given_name", ""),
+                "lastName", getClaimOrDefault(jwt, "family_name", ""),
+                "emailVerified",
+                    jwt.getClaimAsBoolean("email_verified") != null
+                        ? jwt.getClaimAsBoolean("email_verified")
+                        : false
+            )
+        );
     }
 
-    /**
-     * GET /api/welcome — endpoint di esempio protetto per la welcome page
-     */
+    // =========================
+    // WELCOME
+    // =========================
     @GetMapping("/welcome")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Map<String, String>> welcome(@AuthenticationPrincipal Jwt jwt) {
         String username = getClaimOrDefault(jwt, "preferred_username", "Utente");
-        System.out.println("GET /welcome called by " + username);
+
         return ResponseEntity.ok(Map.of(
             "message", "Benvenuto, " + username + "!",
-            "status",  "authenticated"
+            "status", "authenticated"
         ));
-        
     }
 
     private String getClaimOrDefault(Jwt jwt, String claim, String defaultValue) {
@@ -58,68 +66,47 @@ public class UserController {
         return value != null ? value.toString() : defaultValue;
     }
 
-    /**
-     * GET /api/users
-     */
+    // =========================
+    // CRUD USERS
+    // =========================
+
     @GetMapping("/users")
-    //@PreAuthorize("hasRole('USER')")
     public List<User> getAllUsers() {
-        System.out.println("GET /api/users called");
-        return userRepository.findAll();
+        return userService.getAllUsers();
     }
 
-    /**
-     * GET /api/users/{id}
-     */
     @GetMapping("/users/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        return userRepository.findByKeycloakId(id)
+    //@PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<User> getUserById(@PathVariable String id) {
+        return userService.getUserById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    /**
-     * POST /api/users
-     */
     @PostMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
     public User createUser(@RequestBody User user) {
-        return userRepository.save(user);
+        return userService.saveUser(user);
     }
 
-    /**
-     * PUT /api/users/{id}
-     */
     @PutMapping("/users/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
+    public ResponseEntity<User> updateUser(@PathVariable String id, @RequestBody User user) {
 
-        return userRepository.findById(id)
-                .map(existingUser -> {
-                    existingUser.setUsername(user.getUsername());
-                    existingUser.setEmail(user.getEmail());
-                    existingUser.setFirstName(user.getFirstName());
-                    existingUser.setLastName(user.getLastName());
-
-                    return ResponseEntity.ok(userRepository.save(existingUser));
-                })
+        return userService.updateUser(id, user)
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    /**
-     * DELETE /api/users/{id}
-     */
     @DeleteMapping("/users/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteUser(@PathVariable String id) {
 
-        if (!userRepository.existsById(id)) {
+        if (!userService.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
 
-        userRepository.deleteById(id);
+        userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
-    
 }

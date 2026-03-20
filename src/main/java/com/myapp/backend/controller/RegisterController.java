@@ -3,6 +3,7 @@ package com.myapp.backend.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.myapp.backend.service.KeycloakService;
 import com.myapp.backend.service.UserService;
 import com.myapp.backend.dto.RegisterRequest;
 import com.myapp.backend.dto.LoginRequest;
@@ -13,17 +14,31 @@ import com.myapp.backend.repository.UserRepository;
 public class RegisterController {
 
     private final UserService userService;
-
-    public RegisterController(UserService userService) {
+    private final KeycloakService keycloakService;
+    public RegisterController(UserService userService, KeycloakService keycloakService) {
         this.userService = userService;
+        this.keycloakService = keycloakService;
     }
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest req) {
+        System.out.println(req);
+        // 1️⃣ esiste nel DB locale?
+        boolean userExists = userService.userExists(req.getId());
         if (!userService.userExists(req.getId())) {
-            return ResponseEntity.status(401).body("Invalid username");
+            return ResponseEntity.status(404).body("User not found in DB");
         }
-        // Questo endpoint è solo un placeholder. La login reale avviene tramite Keycloak.
-        return ResponseEntity.ok("User found, but login should be handled by Keycloak. This endpoint is not implemented.");
+
+        // 2️⃣ username coerente?
+        if (!userService.userExistsByUsername(req.getUsername())) {
+            return ResponseEntity.status(401).body("Username mismatch");
+        }
+
+        // 3️⃣ esiste in Keycloak?
+        if (!keycloakService.userExists(req.getId())) {
+            return ResponseEntity.status(401).body("User not found in Keycloak");
+        }
+
+        return ResponseEntity.ok("User exists in both systems");
     }
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest req) {

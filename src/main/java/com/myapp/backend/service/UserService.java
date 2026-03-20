@@ -13,8 +13,7 @@ public class UserService {
     private final KeycloakService keycloakService;
     private final UserRepository userRepository;
     private final KafkaProducerService kafkaProducer;
-    public UserService(KeycloakService keycloakService,
-                       UserRepository userRepository,KafkaProducerService kafkaProducer) {
+    public UserService(KeycloakService keycloakService,UserRepository userRepository,KafkaProducerService kafkaProducer) {
         this.keycloakService = keycloakService;
         this.userRepository = userRepository;
         this.kafkaProducer = kafkaProducer;
@@ -23,15 +22,18 @@ public class UserService {
     public boolean userExists(String keycloakId) {
         return userRepository.findById(keycloakId).isPresent();
     }
+    public boolean userExistsByUsername(String username) {
+        return userRepository.findByUsername(username).isPresent();
+    }
 
     public void registerUser(RegisterRequest req) {
 
         // crea utente su keycloak
         String keycloakId = keycloakService.createUser(req);
-
+        System.out.println(keycloakId);
         // salva nel database locale
         User user = new User();
-        user.setId(keycloakId);
+        user.setKeycloakId(keycloakId);
         user.setUsername(req.getUsername());
         user.setEmail(req.getEmail());
         user.setFirstName(req.getFirstName());

@@ -3,14 +3,17 @@ package com.myapp.backend.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "user")
+@Table(name = "users")
 public class User {
 
     @Id
-    private String id; //keycloakID
-  
+    @Column(name = "keycloak_id", nullable = false, length = 36)
+    private String keycloakId; //keycloakID
+
+    @Column(length = 100)
     private String username;
 
+    @Column(unique = true)
     private String email;
 
     private String firstName;
@@ -19,12 +22,12 @@ public class User {
 
     // GETTERS & SETTERS
 
-    public String getId() {
-        return id;
+    public String getKeycloakId() {
+        return keycloakId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setKeycloakId(String keycloakId) {
+        this.keycloakId = keycloakId;
     }
 
     public String getUsername() {

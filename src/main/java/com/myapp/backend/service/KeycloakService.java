@@ -33,7 +33,23 @@ public class KeycloakService {
                 .password(adminPassword)
                 .build();
     }
-
+    public boolean userExistsByUsername(String username) {
+    return !keycloak.realm(realm)
+            .users()
+            .search(username)
+            .isEmpty();
+    }
+    public boolean userExists(String userId){
+        try {
+            return keycloak.realm(realm)
+                    .users()
+                    .get(userId)
+                    .toRepresentation() != null;
+        } catch (Error e) {
+            System.out.println(e);
+            return false;
+        }
+    }
     /**
      * Crea un nuovo utente in Keycloak e imposta la password.
      * @param req dati di registrazione
@@ -54,7 +70,7 @@ public class KeycloakService {
 
         // estrai l'id dall'header Location
         String userId = response.getLocation().getPath().replaceAll(".*/([^/]+)$", "$1");
-
+        System.out.println(userId);
         // imposta password
         keycloak.realm(realm)
                 .users()

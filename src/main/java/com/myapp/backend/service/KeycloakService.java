@@ -1,5 +1,7 @@
 package com.myapp.backend.service;
 
+import com.myapp.backend.dto.LoginRequest;
+
 import com.myapp.backend.dto.RegisterRequest;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
@@ -15,6 +17,7 @@ public class KeycloakService {
 
     private final Keycloak keycloak;
     private final String realm;
+    private final UserService userService;
 
     public KeycloakService(
         // Importa i valori da application.yml
@@ -25,6 +28,8 @@ public class KeycloakService {
             @Value("${keycloak.admin-password}") String adminPassword
     ) {
         this.realm = realm;
+        this.userRepository = new UserRepository();
+        this.userService = new UserService();
         this.keycloak = KeycloakBuilder.builder()
                 .serverUrl(serverUrl)
                 .realm("master")           // sempre master per admin-cli
@@ -64,12 +69,17 @@ public class KeycloakService {
         user.setFirstName(req.getFirstName());
         user.setLastName(req.getLastName());
         user.setEnabled(true);
-
-        // crea utente
+    
         Response response = keycloak.realm(realm).users().create(user);
 
         // estrai l'id dall'header Location
         String userId = response.getLocation().getPath().replaceAll(".*/([^/]+)$", "$1");
+        LoginRequest log = new LoginRequest();
+        log.setId(userId);
+        log.setUsername(user.getUsername());
+        log.setEmail(user.getEmail());
+        userService.registerUser(log);
+        // crea utente
         System.out.println(userId);
         // imposta password
         keycloak.realm(realm)

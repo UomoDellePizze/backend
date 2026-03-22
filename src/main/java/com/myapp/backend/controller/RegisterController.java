@@ -22,18 +22,18 @@ public class RegisterController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest req) {
         System.out.println(req);
-        // 1️⃣ esiste nel DB locale?
+        // esiste nel DB locale?
         boolean userExists = userService.userExists(req.getId());
         if (!userService.userExists(req.getId())) {
             return ResponseEntity.status(404).body("User not found in DB");
         }
 
-        // 2️⃣ username coerente?
+        // username coerente?
         if (!userService.userExistsByUsername(req.getUsername())) {
             return ResponseEntity.status(401).body("Username mismatch");
         }
 
-        // 3️⃣ esiste in Keycloak?
+        // esiste in Keycloak?
         if (!keycloakService.userExists(req.getId())) {
             return ResponseEntity.status(401).body("User not found in Keycloak");
         }
@@ -52,8 +52,7 @@ public class RegisterController {
             return ResponseEntity.ok("User registered successfully");
 
         } catch (Exception e) {
-            return ResponseEntity.status(500)
-                    .body("Registration failed: " + e.getMessage());
+            return ResponseEntity.status(500).body("Registration failed: " + e.getMessage());
         }
     }
 }

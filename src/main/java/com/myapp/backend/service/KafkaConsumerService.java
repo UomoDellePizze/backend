@@ -5,23 +5,26 @@ import com.myapp.backend.entity.User;
 import com.myapp.backend.repository.UserRepository;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
+
 import java.util.Map;
 
 @Service
 public class KafkaConsumerService {
 
     private final UserRepository userRepository;
-    private final ObjectMapper   objectMapper;
+    private final ObjectMapper objectMapper;
 
     public KafkaConsumerService(UserRepository userRepository,
-                                 ObjectMapper objectMapper) {
+                                ObjectMapper objectMapper) {
         this.userRepository = userRepository;
-        this.objectMapper   = objectMapper;
+        this.objectMapper = objectMapper;
+        System.out.println("\n \u001B[31mKafka Consumer  started\u001B[0m");
     }
 
     @KafkaListener(topics = "user-events", groupId = "backend-group")
     public void onUserCreated(String message) {
         try {
+            @SuppressWarnings("unchecked")
             Map<String, String> payload =
                 objectMapper.readValue(message, Map.class);
 

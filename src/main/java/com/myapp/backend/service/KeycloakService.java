@@ -1,7 +1,6 @@
 package com.myapp.backend.service;
 
-import com.myapp.backend.dto.LoginRequest;
-
+import com.myapp.backend.entity.User;
 import com.myapp.backend.dto.RegisterRequest;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
@@ -17,71 +16,64 @@ public class KeycloakService {
 
     private final Keycloak keycloak;
     private final String realm;
-    private final UserService userService;
 
     public KeycloakService(
-        // Importa i valori da application.yml
             @Value("${keycloak.auth-server-url}") String serverUrl,
             @Value("${keycloak.realm}") String realm,
             @Value("${keycloak.client-id}") String clientId,
             @Value("${keycloak.admin-username}") String adminUsername,
             @Value("${keycloak.admin-password}") String adminPassword
     ) {
+        System.out.println("\n \u001B[31mKeycloak Service  started\u001B[0m");
         this.realm = realm;
-        this.userRepository = new UserRepository();
-        this.userService = new UserService();
         this.keycloak = KeycloakBuilder.builder()
                 .serverUrl(serverUrl)
-                .realm("master")           // sempre master per admin-cli
+                .realm("master")
                 .clientId(clientId)
                 .username(adminUsername)
                 .password(adminPassword)
                 .build();
     }
+
     public boolean userExistsByUsername(String username) {
-    return !keycloak.realm(realm)
-            .users()
-            .search(username)
-            .isEmpty();
+        return !keycloak.realm(realm)
+                .users()
+                .search(username)
+                .isEmpty();
     }
-    public boolean userExists(String userId){
+
+    public boolean userExists(String userId) {
         try {
             return keycloak.realm(realm)
                     .users()
                     .get(userId)
                     .toRepresentation() != null;
-        } catch (Error e) {
+        } catch (Exception e) {
             System.out.println(e);
             return false;
         }
     }
+
     /**
      * Crea un nuovo utente in Keycloak e imposta la password.
      * @param req dati di registrazione
      * @return id dell'utente creato
      */
     public String createUser(RegisterRequest req) {
-
-        // costruisci la rappresentazione utente
+        
         UserRepresentation user = new UserRepresentation();
         user.setUsername(req.getUsername());
         user.setEmail(req.getEmail());
         user.setFirstName(req.getFirstName());
         user.setLastName(req.getLastName());
         user.setEnabled(true);
-    
+
         Response response = keycloak.realm(realm).users().create(user);
 
-        // estrai l'id dall'header Location
         String userId = response.getLocation().getPath().replaceAll(".*/([^/]+)$", "$1");
-        LoginRequest log = new LoginRequest();
-        log.setId(userId);
-        log.setUsername(user.getUsername());
-        log.setEmail(user.getEmail());
-        userService.registerUser(log);
-        // crea utente
-        System.out.println(userId);
-        // imposta password
+        System.out.println("\n \u001B[31mKeycloak event\u001B[0m");
+        System.out.println("\u001B[31mCreated Keycloak user with id: " + userId + "\u001B[0m");
+
         keycloak.realm(realm)
                 .users()
                 .get(userId)

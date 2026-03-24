@@ -1,6 +1,8 @@
 package com.myapp.backend.entity;
+import com.myapp.backend.debug.Utility;
 
 import jakarta.persistence.*;
+import org.keycloak.representations.idm.UserRepresentation;
 
 @Entity
 @Table(name = "users")
@@ -10,7 +12,7 @@ public class User {
     @Column(name = "keycloak_id", nullable = false, length = 36)
     private String keycloakId; //keycloakID
 
-    @Column(length = 100)
+    @Column(length = 100,unique = true)
     private String username;
 
     @Column(unique = true)
@@ -20,8 +22,15 @@ public class User {
 
     private String lastName;
 
-    // GETTERS & SETTERS
-
+    public User(){}
+    public User(String id,UserRepresentation userRep){
+        this.keycloakId=id;
+        this.username=userRep.getUsername();
+        this.email=userRep.getEmail();
+        this.firstName=userRep.getFirstName();
+        this.lastName=userRep.getLastName();
+        Utility.debug(id+" "+username);
+    }
     public String getKeycloakId() {
         return keycloakId;
     }

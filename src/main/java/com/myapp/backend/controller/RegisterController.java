@@ -11,7 +11,7 @@ import com.myapp.backend.repository.UserRepository;
 import com.myapp.backend.debug.Utility;
 @RestController
 @RequestMapping("/api/auth")
-public class RegisterController extends Utility{
+public class RegisterController{
     private final UserService userService;
     private final KeycloakService keycloakService;
     public RegisterController(UserService userService, KeycloakService keycloakService) {
@@ -21,23 +21,23 @@ public class RegisterController extends Utility{
     }
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody RegisterRequest req) {
-        super.debug(req.getUsername());
-
-        // username coerente?
-        if (!userService.userExistsByUsername(req.getUsername())) {
-            return ResponseEntity.status(401).body("Username not found");
-        }
+        Utility.debug(req.getUsername());
 
         // esiste in Keycloak?
         if (!keycloakService.userExists(req.getUsername())) {
+            Utility.error("Username not found in Keycloak: "+req.getUsername());
             return ResponseEntity.status(401).body("User not found in Keycloak");
+        }// username coerente?
+        if (!userService.userExistsByUsername(req.getUsername())) {
+            Utility.error("Username not found: "+req.getUsername());
+            return ResponseEntity.status(401).body("Username not found");
         }
-
+        Utility.warn("User exists");
         return ResponseEntity.ok("User exists in both systems");
     }
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest req) {
-
+        Utility.warn("Register: "+req.getUsername());
         if (req.getEmail() == null || req.getUsername() == null || req.getPassword() == null) {
             return ResponseEntity.badRequest().body("Email, username, and password are required");
         }

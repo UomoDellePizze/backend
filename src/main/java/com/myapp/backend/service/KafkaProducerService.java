@@ -1,4 +1,4 @@
-package com.myapp.backend.kafka;
+package com.myapp.backend.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

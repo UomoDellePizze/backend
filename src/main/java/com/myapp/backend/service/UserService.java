@@ -2,9 +2,9 @@ package com.myapp.backend.service;
 
 import com.myapp.backend.dto.RegisterRequest;
 import com.myapp.backend.entity.User;
-import com.myapp.backend.kafka.KafkaProducerService;
 import com.myapp.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import com.myapp.backend.debug.Utility;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +23,7 @@ public class UserService {
         this.keycloakService = keycloakService;
         this.userRepository = userRepository;
         this.kafkaProducer = kafkaProducer;
+        Utility.debug("Admin exists? "+userExistsByUsername("admin"));
     }
 
     public boolean userExists(String keycloakId) {
@@ -34,9 +35,15 @@ public class UserService {
     }
 
     public void registerUser(RegisterRequest req) {
+        //Utility.info("🧾 Registrazione utente: " + req.getUsername());
         String keycloakId = keycloakService.createUser(req);
-        System.out.println("\n \u001B[34m" + keycloakId + "\u001B[0m");
+        User user=new User();
+        user.setKeycloakId(keycloakId);
+        user.setUsername(req.getUsername());
+        Utility.warn("New User! "+ user.getUsername());
+        //Utility.success("✅ Creato su Keycloak: " + keycloakId);
         kafkaProducer.sendUserCreatedEvent(keycloakId, req);
+        Utility.kafka("📤 Evento Kafka inviato per: " + req.getUsername());
     }
 
     public List<User> getAllUsers() {

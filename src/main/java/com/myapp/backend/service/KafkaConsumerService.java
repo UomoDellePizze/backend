@@ -1,47 +1,53 @@
-package com.myapp.backend.kafka;
+package com.myapp.backend.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.myapp.backend.dto.UserEvent;
 import com.myapp.backend.entity.User;
 import com.myapp.backend.repository.UserRepository;
+import com.myapp.backend.debug.Utility;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
-
-import java.util.Map;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class KafkaConsumerService {
 
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final ObjectMapper objectMapper;
 
-    public KafkaConsumerService(UserRepository userRepository,
+    public KafkaConsumerService(UserService userService,
                                 ObjectMapper objectMapper) {
-        this.userRepository = userRepository;
+        this.userService = userService;
         this.objectMapper = objectMapper;
-        System.out.println("\n \u001B[31mKafka Consumer  started\u001B[0m");
+        Utility.kafka("Kafka Consumer started");
     }
 
     @KafkaListener(topics = "user-events", groupId = "backend-group")
     public void onUserCreated(String message) {
-        try {
-            @SuppressWarnings("unchecked")
-            Map<String, String> payload =
-                objectMapper.readValue(message, Map.class);
 
-            // Idempotency guard — skip if already saved
-            if (userRepository.existsById(payload.get("keycloakId"))) return;
+        Utility.kafka("🔥 RAW MESSAGE: " + message);
+
+        try {
+            UserEvent payload = objectMapper.readValue(message, UserEvent.class);
+
+            if (userService.existsById(payload.getKeycloakId())) {
+                Utility.warn("⚠️ Utente già esistente: " + payload.getUsername());
+                return;
+            }
 
             User user = new User();
-            user.setKeycloakId(payload.get("keycloakId"));
-            user.setUsername(payload.get("username"));
-            user.setEmail(payload.get("email"));
-            user.setFirstName(payload.get("firstName"));
-            user.setLastName(payload.get("lastName"));
-            userRepository.save(user);
+            user.setKeycloakId(payload.getKeycloakId());
+            user.setUsername(payload.getUsername());
+            user.setEmail(payload.getEmail());
+            user.setFirstName(payload.getFirstName());
+            user.setLastName(payload.getLastName());
 
-            System.out.println("User saved from Kafka: " + user.getUsername());
+            userService.saveUser(user); // ✅ QUI
+
+            //Utility.success("💾 Utente salvato da Kafka: " + user.getUsername());
+
         } catch (Exception e) {
-            System.err.println("Failed to process user event: " + e.getMessage());
+            Utility.error("❌ ERRORE Kafka: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }

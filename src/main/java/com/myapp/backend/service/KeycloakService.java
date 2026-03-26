@@ -8,6 +8,7 @@ import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import com.myapp.backend.debug.Utility;
 
 import jakarta.ws.rs.core.Response;
 
@@ -25,6 +26,7 @@ public class KeycloakService {
             @Value("${keycloak.admin-password}") String adminPassword
     ) {
         System.out.println("\n \u001B[31mKeycloak Service  started\u001B[0m");
+        Utility.debug("Debug attivo");
         this.realm = realm;
         this.keycloak = KeycloakBuilder.builder()
                 .serverUrl(serverUrl)
@@ -36,6 +38,7 @@ public class KeycloakService {
     }
 
     public boolean userExistsByUsername(String username) {
+        Utility.debug("UserExists?: "+username);
         return !keycloak.realm(realm)
                 .users()
                 .search(username)
@@ -43,6 +46,7 @@ public class KeycloakService {
     }
 
     public boolean userExists(String userId) {
+        Utility.debug("UserExists?: "+userId);
         try {
             return keycloak.realm(realm)
                     .users()
@@ -56,11 +60,14 @@ public class KeycloakService {
 
     /**
      * Crea un nuovo utente in Keycloak e imposta la password.
-     * @param req dati di registrazione
-     * @return id dell'utente creato
+     * @param req dati di registrazionedscf
+     * @return id dell'utente creatodscf
      */
     public String createUser(RegisterRequest req) {
-        
+        Utility.debug("CreateUser?: "+ req.getUsername());
+        if (userExistsByUsername(req.getUsername())) {
+            throw new RuntimeException("Username already exists in Keycloak: " + req.getUsername());
+        }
         UserRepresentation user = new UserRepresentation();
         user.setUsername(req.getUsername());
         user.setEmail(req.getEmail());

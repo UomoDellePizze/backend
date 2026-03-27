@@ -22,7 +22,6 @@ public class RegisterController{
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody RegisterRequest req) {
         Utility.debug(req.getUsername());
-
         // esiste in Keycloak?
         if (!keycloakService.userExists(req.getUsername())) {
             Utility.error("Username not found in Keycloak: "+req.getUsername());

@@ -1,5 +1,6 @@
 package com.myapp.backend.entity;
 import com.myapp.backend.debug.Utility;
+import com.myapp.backend.dto.RegisterRequest;
 
 import jakarta.persistence.*;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -24,6 +25,15 @@ public class User {
 
     public User(){}
     public User(String id,UserRepresentation userRep){
+        this.keycloakId=id;
+        this.username=userRep.getUsername();
+        this.email=userRep.getEmail();
+        this.firstName=userRep.getFirstName();
+        this.lastName=userRep.getLastName();
+        Utility.debug(id+" "+username);
+    }
+
+    public User(String id,RegisterRequest userRep){
         this.keycloakId=id;
         this.username=userRep.getUsername();
         this.email=userRep.getEmail();

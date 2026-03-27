@@ -1,0 +1,1 @@
+front > regcontroller > userServ > keycloak/kafka

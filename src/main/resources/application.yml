@@ -22,7 +22,7 @@ spring:
 
       properties:
         spring.json.trusted.packages: "*"
-        spring.json.value.default.type: com.myapp.backend.dto.UserEventDTO
+        spring.json.value.default.type: com.myapp.backend.dto.UserEvent
 
   datasource:
     url: jdbc:mysql://localhost:3306/appdb

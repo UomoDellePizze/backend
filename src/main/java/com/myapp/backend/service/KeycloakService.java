@@ -36,7 +36,7 @@ public class KeycloakService {
                 .password(adminPassword)
                 .build();
     }
-
+    
     public boolean userExistsByUsername(String username) {
         Utility.debug("UserExists?: "+username);
         return !keycloak.realm(realm)
@@ -60,8 +60,8 @@ public class KeycloakService {
 
     /**
      * Crea un nuovo utente in Keycloak e imposta la password.
-     * @param req dati di registrazionedscf
-     * @return id dell'utente creatodscf
+     * @param req dati di registrazione
+     * @return id dell'utente creato
      */
     public String createUser(RegisterRequest req) {
         Utility.debug("CreateUser?: "+ req.getUsername());

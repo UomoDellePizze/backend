@@ -37,13 +37,13 @@ public class UserService {
     public void registerUser(RegisterRequest req) {
         //Utility.info("🧾 Registrazione utente: " + req.getUsername());
         String keycloakId = keycloakService.createUser(req);
-        User user=new User();
-        user.setKeycloakId(keycloakId);
-        user.setUsername(req.getUsername());
+        User user=new User(keycloakId,req);
+        saveUser(user);
         Utility.warn("New User! "+ user.getUsername());
         //Utility.success("✅ Creato su Keycloak: " + keycloakId);
         kafkaProducer.sendUserCreatedEvent(keycloakId, req);
         Utility.kafka("📤 Evento Kafka inviato per: " + req.getUsername());
+        
     }
 
     public List<User> getAllUsers() {
@@ -55,7 +55,7 @@ public class UserService {
     }
 
     public User saveUser(User user) {
-        return userRepository.save(user);
+        return userRepository.saveAndFlush(user);
     }
 
     public Optional<User> updateUser(String id, User user) {

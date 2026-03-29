@@ -1,24 +1,13 @@
 package com.myapp.backend.dto;
 
 public class LoginRequest {
-    private String id;
-    private String username;
-    private String email;
-    // getters and setters
-    public String getEmail(){return email;}
 
-    public void setEmail(String email){this.email = email;}
+    private String keycloakId;       // keycloakId (sub dal JWT)
+    private String username; // preferred_username dal JWT
 
-    public String getId(){return id;}
-    
-    public void setId(String id){this.id=id;}
-    
-    public String getUsername() {
-        return username;
-    }
+    public String getId() { return keycloakId; }
+    public void setId(String keycloakId) { this.keycloakId = keycloakId; }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
 }

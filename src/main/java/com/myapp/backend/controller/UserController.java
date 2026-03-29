@@ -83,13 +83,13 @@ public class UserController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-
+/*
     @PostMapping("/users")
     //@PreAuthorize("hasRole('ADMIN')")
     public User createUser(@RequestBody User user) {
         return userService.saveUser(user);
     }
-
+*/
     @PutMapping("/users/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<User> updateUser(@PathVariable String id, @RequestBody User user) {
